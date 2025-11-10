@@ -37,6 +37,29 @@ export default function TransactionTable({ transactions, initialBalance }: Trans
   
   const transactionsWithBalance = initialBalance !== undefined ? calculateRunningBalance() : transactions;
 
+  const renderAmount = (tx: Transaction) => {
+    if (tx.type === 'sale') {
+      return (
+        <TableCell className="text-right font-medium text-red-600 dark:text-red-400">
+          {formatCurrency(tx.amount)}
+        </TableCell>
+      );
+    }
+    return <TableCell className="text-right">-</TableCell>;
+  };
+  
+  const renderCredit = (tx: Transaction) => {
+    if (tx.type === 'payment' || tx.type === 'return') {
+      return (
+        <TableCell className="text-right font-medium text-green-600 dark:text-green-400">
+          {formatCurrency(tx.amount)}
+        </TableCell>
+      );
+    }
+    return <TableCell className="text-right">-</TableCell>;
+  };
+
+
   return (
     <div className="w-full">
       <Table>
@@ -45,7 +68,7 @@ export default function TransactionTable({ transactions, initialBalance }: Trans
             <TableHead>Date</TableHead>
             <TableHead>Description</TableHead>
             <TableHead className="text-right">Sale</TableHead>
-            <TableHead className="text-right">Payment</TableHead>
+            <TableHead className="text-right">Payment/Return</TableHead>
             {initialBalance !== undefined && <TableHead className="text-right">Balance</TableHead>}
           </TableRow>
         </TableHeader>
@@ -55,15 +78,12 @@ export default function TransactionTable({ transactions, initialBalance }: Trans
               <TableRow key={tx.id}>
                 <TableCell>{formatDate(tx.date)}</TableCell>
                 <TableCell>
-                  <p className='font-medium'>{tx.description}</p>
+                  <p className='font-medium'>{tx.type === 'return' ? 'Item Return' : tx.description}</p>
                   {tx.type === 'payment' && tx.paymentMode && <p className='text-sm text-muted-foreground'>Mode: {tx.paymentMode}</p>}
+                  {tx.type === 'return' && tx.description !== 'Item Return' && <p className='text-sm text-muted-foreground'>Reason: {tx.description}</p>}
                 </TableCell>
-                <TableCell className="text-right font-medium text-red-600 dark:text-red-400">
-                  {tx.type === 'sale' ? formatCurrency(tx.amount) : '-'}
-                </TableCell>
-                <TableCell className="text-right font-medium text-green-600 dark:text-green-400">
-                  {tx.type === 'payment' ? formatCurrency(tx.amount) : '-'}
-                </TableCell>
+                {renderAmount(tx)}
+                {renderCredit(tx)}
                 {initialBalance !== undefined && 'runningBalance' in tx && (
                   <TableCell className="text-right font-semibold">
                     {formatCurrency(tx.runningBalance)}

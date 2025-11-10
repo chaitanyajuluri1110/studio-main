@@ -64,7 +64,7 @@ const StatementContent = React.forwardRef<HTMLDivElement, { customer: Customer; 
                     <th className="p-2 text-left font-semibold">Date</th>
                     <th className="p-2 text-left font-semibold">Description</th>
                     <th className="p-2 text-right font-semibold">Sale (Debit)</th>
-                    <th className="p-2 text-right font-semibold">Payment (Credit)</th>
+                    <th className="p-2 text-right font-semibold">Payment/Return (Credit)</th>
                     <th className="p-2 text-right font-semibold">Balance</th>
                 </tr>
             </thead>
@@ -78,7 +78,7 @@ const StatementContent = React.forwardRef<HTMLDivElement, { customer: Customer; 
                     <td className="p-2">{formatDate(tx.date)}</td>
                     <td className="p-2 flex items-center gap-2">{tx.description}</td>
                     <td className="p-2 text-right font-mono">{tx.type === 'sale' ? formatCurrency(tx.amount) : '-'}</td>
-                    <td className="p-2 text-right font-mono text-green-700">{tx.type === 'payment' ? formatCurrency(tx.amount) : '-'}</td>
+                    <td className="p-2 text-right font-mono text-green-700">{tx.type === 'payment' || tx.type === 'return' ? formatCurrency(tx.amount) : '-'}</td>
                     <td className="p-2 text-right font-mono font-semibold">{formatCurrency(tx.runningBalance)}</td>
                 </tr>
                 ))}
@@ -121,15 +121,15 @@ export default function StatementDialog({ open, onOpenChange, customer, transact
           if (index === 0) {
               // The balance *before* this transaction is the outstanding balance minus this transaction's effect
               currentBalance = customer.outstandingBalance - sortedTx.slice(1).reduce((acc, t) => acc + (t.type === 'sale' ? t.amount : -t.amount), 0);
-              currentBalance -= (tx.type === 'sale' ? tx.amount : -tx.amount);
+              currentBalance -= (tx.type === 'sale' ? tx.amount : -(tx.amount));
           }
-          currentBalance += (tx.type === 'sale' ? tx.amount : -tx.amount);
+          currentBalance += (tx.type === 'sale' ? tx.amount : -(tx.amount));
           return { ...tx, runningBalance: currentBalance };
       });
 
       const firstTransaction = sortedTx[0];
       if(firstTransaction) {
-        const opening = firstTransaction.runningBalance - (firstTransaction.type === 'sale' ? firstTransaction.amount : -firstTransaction.amount);
+        const opening = firstTransaction.runningBalance - (firstTransaction.type === 'sale' ? firstTransaction.amount : -(firstTransaction.amount));
         setOpeningBalance(opening);
       } else {
         setOpeningBalance(customer.outstandingBalance);

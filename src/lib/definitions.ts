@@ -7,7 +7,7 @@ export type Customer = {
   address?: string;
 };
 
-export type TransactionType = 'sale' | 'payment';
+export type TransactionType = 'sale' | 'payment' | 'return';
 
 export type Transaction = {
   id: string;
@@ -19,4 +19,5 @@ export type Transaction = {
   quantity?: number;
   rate?: number;
   paymentMode?: 'Cash' | 'Bank Transfer' | 'UPI';
+  returnReason?: string;
 };

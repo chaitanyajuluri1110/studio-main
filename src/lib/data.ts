@@ -1,4 +1,3 @@
-
 import {
   collection,
   doc,
@@ -188,7 +187,7 @@ export async function addTransaction(txData: Omit<Transaction, 'id'>): Promise<T
 
     if (txData.type === 'sale') {
         newBalance += txData.amount;
-    } else if (txData.type === 'payment') {
+    } else if (txData.type === 'payment' || txData.type === 'return') {
         newBalance -= txData.amount;
     }
 
@@ -196,6 +195,16 @@ export async function addTransaction(txData: Omit<Transaction, 'id'>): Promise<T
 
     await batch.commit();
     
+    // For returns with optional description, we standardize the main description
+    if (txData.type === 'return' && txData.description) {
+      return {
+        id: newTxRef.id,
+        ...txData,
+        description: 'Item Return', // Standardize main description
+        returnReason: txData.description // Store custom reason separately
+      } as Transaction;
+    }
+
     return {
         id: newTxRef.id,
         ...txData,

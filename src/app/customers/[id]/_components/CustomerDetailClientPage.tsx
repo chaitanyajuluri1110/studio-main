@@ -4,7 +4,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { Customer, Transaction } from '@/lib/definitions';
 import { PageHeader } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
-import { FileText, Landmark, PlusCircle, ShoppingCart, Pencil } from 'lucide-react';
+import { FileText, Landmark, PlusCircle, ShoppingCart, Pencil, Undo2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,7 @@ import AddPaymentDialog from './AddPaymentDialog';
 import StatementDialog from './StatementDialog';
 import AddCustomerDialog from '../../_components/AddCustomerDialog';
 import { getCustomerById, getTransactionsForCustomer } from '@/lib/data';
+import AddReturnDialog from './AddReturnDialog';
 
 interface CustomerDetailClientPageProps {
   initialCustomer: Customer;
@@ -28,6 +29,7 @@ export default function CustomerDetailClientPage({
   const [transactions, setTransactions] = useState(initialTransactions);
   const [isSaleDialogOpen, setIsSaleDialogOpen] = useState(false);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [isReturnDialogOpen, setIsReturnDialogOpen] = useState(false);
   const [isStatementDialogOpen, setIsStatementDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
@@ -70,6 +72,9 @@ export default function CustomerDetailClientPage({
             </Button>
             <Button variant="outline" onClick={() => setIsPaymentDialogOpen(true)}>
               <Landmark className="mr-2 h-4 w-4" /> Add Payment
+            </Button>
+            <Button variant="outline" onClick={() => setIsReturnDialogOpen(true)}>
+              <Undo2 className="mr-2 h-4 w-4" /> Add Return
             </Button>
             <Button onClick={() => setIsStatementDialogOpen(true)}>
               <FileText className="mr-2 h-4 w-4" /> Generate Statement
@@ -126,6 +131,13 @@ export default function CustomerDetailClientPage({
         onOpenChange={setIsPaymentDialogOpen}
         customerId={customer.id}
         onPaymentAdded={handleTransactionAdded}
+      />
+
+      <AddReturnDialog
+        open={isReturnDialogOpen}
+        onOpenChange={setIsReturnDialogOpen}
+        customerId={customer.id}
+        onReturnAdded={handleTransactionAdded}
       />
 
       <StatementDialog
